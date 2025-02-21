@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XOX</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.3/howler.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+</head>
+<body>
+    <!-- Bot Mesaj Balonu -->
+    <div id="botMessage" class="bot-message"></div>
+
+    <main class="main-content">
+        <div class="container">
+            <h1 class="glow">XoX</h1>
+            
+            <!-- Ayarlar Butonu -->
+            <button id="settingsBtn" class="btn settings-btn">
+                <i class="fas fa-cog"></i>
+            </button>
+
+            <!-- Skor -->
+            <div class="score-container">
+                <div class="score">
+                    <span id="playerName">Sen</span>: <span id="playerScore">0</span>
+                </div>
+                <div class="score">PC: <span id="aiScore">0</span></div>
+            </div>
+            
+            <!-- Oyun Tahtası -->
+            <div class="game-board" id="board">
+                <div class="cell" data-index="0"></div>
+                <div class="cell" data-index="1"></div>
+                <div class="cell" data-index="2"></div>
+                <div class="cell" data-index="3"></div>
+                <div class="cell" data-index="4"></div>
+                <div class="cell" data-index="5"></div>
+                <div class="cell" data-index="6"></div>
+                <div class="cell" data-index="7"></div>
+                <div class="cell" data-index="8"></div>
+            </div>
+
+            <!-- Oyun Durumu -->
+            <div class="status" id="status">Oyun Başlıyor...</div>
+
+            <!-- Kontroller -->
+            <div class="controls">
+                <button id="restartBtn" class="btn">
+                    <i class="fas fa-redo"></i> Yeni Oyun
+                </button>
+            </div>
+
+            <!-- Gizli Kod İpucu -->
+            <div id="secretHint" class="secret-hint"></div>
+        </div>
+    </main>
+
+    <!-- Başarımlar Modal -->
+    <div id="achievementsModal" class="modal">
+        <div class="modal-content achievements-panel">
+            <h2>Başarımlar ve İpuçları</h2>
+            
+            <div class="achievements-section">
+                <h3>Mevcut Başarımlar</h3>
+                <div class="achievements-list">
+                    <div class="achievement-item" id="modal-achievement-first-win">
+                        <i class="fas fa-trophy achievement-icon"></i>
+                        <div class="achievement-details">
+                            <span class="achievement-name">İlk Zafer</span>
+                            <span class="achievement-desc">İlk oyununu kazan</span>
+                        </div>
+                    </div>
+                    <div class="achievement-item" id="modal-achievement-streak">
+                        <i class="fas fa-fire achievement-icon"></i>
+                        <div class="achievement-details">
+                            <span class="achievement-name">Seri Katil</span>
+                            <span class="achievement-desc">3 kez üst üste kazan</span>
+                        </div>
+                    </div>
+                    <div class="achievement-item" id="modal-achievement-impossible">
+                        <i class="fas fa-star achievement-icon"></i>
+                        <div class="achievement-details">
+                            <span class="achievement-name">İmkansızı Başaran</span>
+                            <span class="achievement-desc">İmkansız modda kazan</span>
+                        </div>
+                    </div>
+                    <div class="achievement-item" id="modal-achievement-master">
+                        <i class="fas fa-crown achievement-icon"></i>
+                        <div class="achievement-details">
+                            <span class="achievement-name">Usta Oyuncu</span>
+                            <span class="achievement-desc">10 oyun kazan</span>
+                        </div>
+                    </div>
+                    <div class="achievement-item" id="modal-achievement-draw">
+                        <i class="fas fa-handshake achievement-icon"></i>
+                        <div class="achievement-details">
+                            <span class="achievement-name">Diplomatik</span>
+                            <span class="achievement-desc">Berabere kal</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tips-section">
+                <h3>İpuçları</h3>
+                <ul class="tips-list">
+                    <li><i class="fas fa-lightbulb"></i> Köşeleri kontrol etmeyi unutma!</li>
+                    <li><i class="fas fa-keyboard"></i> Gizli kodları keşfet ve oyunu daha eğlenceli hale getir.</li>
+                    <li><i class="fas fa-chess"></i> Merkezi kontrol etmek önemli bir strateji.</li>
+                    <li><i class="fas fa-gamepad"></i> Farklı zorluk seviyelerini dene.</li>
+                    <li><i class="fas fa-magic"></i> Ayarlardan özel efektleri keşfet!</li>
+                </ul>
+            </div>
+
+            <button id="closeAchievements" class="btn">
+                <i class="fas fa-times"></i> Kapat
+            </button>
+        </div>
+    </div>
+
+    <!-- Ayarlar Modal -->
+    <div id="settingsModal" class="modal">
+        <div class="modal-content">
+            <h2>Ayarlar</h2>
+            
+            <div class="settings-group">
+                <label>Tema:</label>
+                <select id="themeSelect" class="select">
+                    <option value="dark">Karanlık</option>
+                    <option value="light">Aydınlık</option>
+                    <option value="blue">Mavi</option>
+                    <option value="purple">Mor</option>
+                </select>
+            </div>
+
+            <div class="settings-group">
+                <label>Animasyonlar:</label>
+                <div class="toggle-container">
+                    <label class="toggle">
+                        <input type="checkbox" id="animationsToggle" checked>
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="settings-group">
+                <label>Hile Kodları:</label>
+                <select id="cheatSelect" class="select" onchange="this.value = '';">
+                    <option value="">Kod Seç...</option>
+                    <option value="kolay">kolay - Bot kötü oynamaya başlar (90% kazanma şansı)</option>
+                    <option value="süperkolay">süperkolay - Bot en kötü hamleleri yapar</option>
+                    <option value="kazan">kazan - Her zaman kazanırsınız</option>
+                    <option value="nyan">nyan - Gökkuşağı efekti</option>
+                    <option value="party">party - Parti efekti</option>
+                    <option value="ghost">ghost - Hayalet modu</option>
+                    <option value="pixel">pixel - Piksel görünümü</option>
+                    <option value="retro">retro - Eski görünüm</option>
+                    <option value="glitch">glitch - Bozulma efekti</option>
+                    <option value="ultra">ultra - Ultra parlak mod</option>
+                    <option value="ninja">ninja - Ninja modu</option>
+                    <option value="turbo">turbo - Turbo efekti</option>
+                    <option value="power">power - Güç modu</option>
+                </select>
+                <div class="cheat-info">
+                    Not: Kodları klavyeden yazarak aktif edebilirsiniz.
+                </div>
+            </div>
+
+            <!-- Başarımlar -->
+            <div class="settings-group">
+                <label>Başarımlar:</label>
+                <div class="achievements">
+                    <div class="achievement-item" id="achievement-first-win">
+                        <i class="fas fa-trophy achievement-icon"></i>
+                        <span>İlk Zafer - İlk oyununu kazan</span>
+                    </div>
+                    <div class="achievement-item" id="achievement-streak">
+                        <i class="fas fa-fire achievement-icon"></i>
+                        <span>Seri Katil - 3 kez üst üste kazan</span>
+                    </div>
+                    <div class="achievement-item" id="achievement-impossible">
+                        <i class="fas fa-star achievement-icon"></i>
+                        <span>İmkansızı Başaran - İmkansız modda kazan</span>
+                    </div>
+                    <div class="achievement-item" id="achievement-master">
+                        <i class="fas fa-crown achievement-icon"></i>
+                        <span>Usta Oyuncu - 10 oyun kazan</span>
+                    </div>
+                    <div class="achievement-item" id="achievement-draw">
+                        <i class="fas fa-handshake achievement-icon"></i>
+                        <span>Diplomatik - Berabere kal</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="settings-group">
+                <label>Verileri Sıfırla:</label>
+                <button id="resetDataBtn" class="btn danger">
+                    <i class="fas fa-trash"></i> Tüm Verileri Sıfırla
+                </button>
+            </div>
+
+            <button id="closeSettings" class="btn">
+                <i class="fas fa-times"></i> Kapat
+            </button>
+        </div>
+    </div>
+
+    <!-- Admin Panel Modal -->
+    <div id="adminModal" class="modal">
+        <div class="modal-content admin-panel">
+            <h2>Yönetim Paneli</h2>
+            
+            <div class="admin-section">
+                <h3>Aktif Oyuncular</h3>
+                <div id="activePlayers" class="player-list"></div>
+            </div>
+
+            <div class="admin-section">
+                <h3>Oyun Kontrolü</h3>
+                <div class="admin-controls">
+                    <button id="adminMove" class="btn">Hamle Yap</button>
+                    <button id="adminReset" class="btn danger">Oyunu Sıfırla</button>
+                    <button id="adminWin" class="btn success">Oyuncuyu Kazan</button>
+                </div>
+            </div>
+
+            <div class="admin-section">
+                <h3>İstatistikler</h3>
+                <div id="playerStats" class="stats-list"></div>
+            </div>
+
+            <button id="closeAdmin" class="btn">
+                <i class="fas fa-times"></i> Kapat
+            </button>
+        </div>
+    </div>
+
+    <script src="game.js"></script>
+</body>
+</html>
