@@ -52,7 +52,7 @@ Modern ve eğlenceli bir XOX (Tic Tac Toe) oyunu. İmkansız modda yapay zekaya 
 
 ## 🌐 Demo
 
-[Oyunu oynamak için tıklayın](https://xox-game.netlify.app)
+[Oyunu oynamak için tıklayın](https://imkansiz-xox.netlify.app)
 
 ## 💻 Yerel Ortamda Çalıştırma
 
